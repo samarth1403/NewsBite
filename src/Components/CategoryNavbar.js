@@ -1,11 +1,11 @@
-import React, { Component } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 
-export default class CategoryNavbar extends Component {
-  render() {
+const CategoryNavbar = () => {
+
     return (
-      <div>
-        <ul className="nav nav-tabs" >
+      <div className="container" >
+        <ul className="nav nav-tabs ">
           {/* <li className="nav-item" >
             <button className="nav-link" style={{color:'black'}} onClick={this.props.handleIndianClick} >
               Indian
@@ -65,5 +65,6 @@ export default class CategoryNavbar extends Component {
         </ul>
       </div>
     );
-  }
+  
 }
+export default  CategoryNavbar

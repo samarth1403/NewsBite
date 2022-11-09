@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React,{useState,useEffect} from 'react'
 import CategoryNavbar from './CategoryNavbar';
 
 import NewsItem from './NewsItem'
@@ -7,8 +7,8 @@ import PropTypes from 'prop-types'
 import InfiniteScroll from 'react-infinite-scroll-component';
 
 
-export class News extends Component {
-  
+const News = (props) => {
+ 
 //   articles = [
 //     {
 //         "source": {
@@ -43,7 +43,7 @@ export class News extends Component {
 //             "name": "USA Today"
 //         },
 //         "author": "Simon Samano",
-//         "title": "Jake Paul after beating Anderson Silva: 'Dana White can suck this d*ck' - MMA Junkie",
+//         "title": "Jake Paul after beating Anderson Silva: 'Dana White can suck d*ck' - MMA Junkie",
 //         "description": "Jake Paul went THERE with his message to Dana White after his win over Anderson Silva.",
 //         "url": "https://mmajunkie.usatoday.com/2022/10/jake-paul-nsfw-message-dana-white-after-anderson-silva-win",
 //         "urlToImage": "https://mmajunkie.usatoday.com/wp-content/uploads/sites/91/2022/10/jake-paul-post-fight.jpg?w=1000&h=576&crop=1",
@@ -149,11 +149,11 @@ export class News extends Component {
 //         },
 //         "author": "",
 //         "title": "Your Halloween plans may need to change thanks to scary weather predictions - NPR",
-//         "description": "Forecasters predict that heavy rainfall this Halloweekend will make trick-or-treating a no go in drought-stricken parts of the country.",
+//         "description": "Forecasters predict that heavy rainfall Halloweekend will make trick-or-treating a no go in drought-stricken parts of the country.",
 //         "url": "https://www.npr.org/2022/10/29/1132625890/halloween-weather-forecasts-trick-or-treating",
 //         "urlToImage": "https://media.npr.org/assets/img/2022/10/29/gettyimages-155081794_wide-89c7aff91969c866ad3a06af33346b70354991a5-s1400-c100.jpg",
 //         "publishedAt": "2022-10-29T22:30:53Z",
-//         "content": "A family goes trick or treating in Fort Greene, Brooklyn, in 2012.\r\nJemal Countess/Getty Images\r\nHeavy rain and thunderstorms could literally dampen trick-or-treating this Halloween. \r\nMeteorologists… [+2174 chars]"
+//         "content": "A family goes trick or treating in Fort Greene, Brooklyn, in 2012.\r\nJemal Countess/Getty Images\r\nHeavy rain and thunderstorms could literally dampen trick-or-treating Halloween. \r\nMeteorologists… [+2174 chars]"
 //     },
 //     {
 //         "source": {
@@ -247,161 +247,171 @@ export class News extends Component {
 //         "content": "Lately Dogecoin (DOGE) has been behaving more like a greyhound and less like the Shiba Inu that represents the meme-based cryptocurrency.\r\nThe price of DOGE has increased 150% from $0.0594 to $0.15 s… [+1234 chars]"
 //     }
 // ]
- 
-  static defaultProps = {
-       pageSize : 9,
-       category : 'general',
-       apiKey : '686531ff838549f2ae9ed953de34b76f',
-       categoryCountry : "in"
-  }
-
-  static PropType = {
-       pageSize : PropTypes.number,
-       category : PropTypes.string,
-       apiKey : PropTypes.string,
-       categoryCountry : PropTypes.string
-  }
-  
-  constructor(props){
-    super(props);
-    this.state = {
-      articles : [],
-      page : 1,
-      loading : false,
-      totalResults: 0
+    const capitalize = (word) =>{
+      let lower = word.toLowerCase();
+      return lower.charAt(0).toUpperCase() + (lower.slice(1));
     }
-    document.title = `NewsBite | ${this.capitalize(this.props.category)}`
-  }
-
-  capitalize = (word) =>{
-     let lower = word.toLowerCase();
-     return lower.charAt(0).toUpperCase() + (lower.slice(1));
-  }
+    
+  const [articles , setArticles] = useState([])
+  const [page , setPage] = useState(1)
+  const [loading , setLoading] = useState(false)
+  const [totalResults , setTotalResults] = useState(0)
+ 
   
-  componentDidMount = async() =>{
-    this.props.setProgress(10)
-    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.categoryCountry}&category=${this.props.category}&apiKey=${this.props.apiKey}&page=1&pageSize=${this.props.pageSize}`;
-    this.setState({loading:true})
-    let data = await fetch(url);
-    this.props.setProgress(30)
-    let parsedData = await data.json();
-    this.props.setProgress(100)
-    this.setState({loading:false})
-    this.setState({
-        articles : parsedData.articles,
-        totalResults : parsedData.totalResults
-    })
-    // this.props.setProgress(100)
-    // this.setState({
-    //   page : this.state.page
-    // })
-    // this.update();
+  // constructor(props){
+  //   super(props);
+  //   state = {
+  //     articles : [],
+  //     page : 1,
+  //     loading : false,
+  //     totalResults: 0
+  //   }
+    
+  // }
 
-  }
+  
+
+  useEffect(() =>{
+    updateNews();
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  },[])
+  
+  const updateNews = async() =>{
+
+    document.title = `NewsBite | ${capitalize(props.category)}`
+    props.setProgress(10)
+    let url = `https://newsapi.org/v2/top-headlines?country=${props.categoryCountry}&category=${props.category}&apiKey=${props.apiKey}&page=1&pageSize=${props.pageSize}`;
+    //setState({loading:true})
+    setLoading(true)
+    let data = await fetch(url);
+    props.setProgress(30)
+    let parsedData = await data.json();
+    props.setProgress(100)
+    setLoading(false)
+    setArticles(parsedData.articles)
+    setTotalResults(parsedData.totalResults)
+    
+    // setState({
+    //     articles : parsedData.articles,
+    //     totalResults : parsedData.totalResults
+    // })
+    // props.setProgress(100)
+    // setState({
+    //   page : state.page
+    // })
+    // update();
+
+  // }
 
   // update = async() =>{
-  //   const url = `https://newsapi.org/v2/top-headlines?country=${this.props.categoryCountry}&category=${this.props.category}&apiKey=${this.props.apiKey}&page=${this.state.page}&pageSize=${this.props.pageSize}`;
-  //   this.setState({loading:true})
+  //   const url = `https://newsapi.org/v2/top-headlines?country=${props.categoryCountry}&category=${props.category}&apiKey=${props.apiKey}&page=${state.page}&pageSize=${props.pageSize}`;
+  //   setState({loading:true})
   //   let data = await fetch(url);
   //   let parsedData = await data.json();
-  //   this.setState({loading:false})
-  //   this.setState({
+  //   setState({loading:false})
+  //   setState({
   //       articles : parsedData.articles,
-  //       totalResults : this.state.totalResults
+  //       totalResults : state.totalResults
   //   })
   // }
 
-  handlePrevious = async() =>{
-    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.categoryCountry}&category=${this.props.category}&apiKey=${this.props.apiKey}&page=${this.state.page - 1}&pageSize=${this.props.pageSize}`;
-    this.setState({loading:true})
-    let data = await fetch(url);
-    let parsedData = await data.json();
-    this.setState({loading:false})
-    this.setState({
-        articles : parsedData.articles,
-        totalResults : this.state.totalResults,
-        page : this.state.page - 1
-    })
-    // this.setState({
-    //   page : this.state.page - 1
+  // const handlePrevious = async() =>{
+  //   let url = `https://newsapi.org/v2/top-headlines?country=${props.categoryCountry}&category=${props.category}&apiKey=${props.apiKey}&page=${page - 1}&pageSize=${props.pageSize}`;
+  //   setLoading(true)
+  //  // setState({loading:true})
+  //   let data = await fetch(url);
+  //   let parsedData = await data.json();
+  //   setLoading(false)
+  //   setArticles(parsedData.articles)
+  //   setTotalResults(totalResults)
+  //   setPage(page-1)
+    // setState({
+    //     articles : parsedData.articles,
+    //     totalResults : state.totalResults,
+    //     page : state.page - 1
     // })
-    // this.update();
+    // setState({
+    //   page : state.page - 1
+    // })
+    // update();
   }
 
-  handleNext = async() => {
-    if(this.state.page + 1 > Math.ceil(this.state.totalResults/this.props.pageSize)){
+  // const handleNext = async() => {
+  //   if(page + 1 > Math.ceil(totalResults/props.pageSize)){
 
-    }
-    else{
-    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.categoryCountry}&category=${this.props.category}&apiKey=${this.props.apiKey}&page=${this.state.page+1}&pageSize=${this.props.pageSize}`;
-    this.setState({loading:true})
-    let data = await fetch(url);
-    let parsedData = await data.json();
-    this.setState({loading:false})
-    this.setState({})
-    this.setState({
-        articles : parsedData.articles,
-        page : this.state.page + 1,
-        totalResults : this.state.totalResults
-    })
+  //   }
+  //   else{
+  //   let url = `https://newsapi.org/v2/top-headlines?country=${props.categoryCountry}&category=${props.category}&apiKey=${props.apiKey}&page=${page+1}&pageSize=${props.pageSize}`;
+  //   setLoading(true)
+  //   let data = await fetch(url);
+  //   let parsedData = await data.json();
+  //   setLoading(false)
+  //   setArticles(parsedData.articles)
+  //   setTotalResults(totalResults)
+  //   setPage(page+1)
+  //   // setState({
+  //   //     articles : parsedData.articles,
+  //   //     page : state.page + 1,
+  //   //     totalResults : state.totalResults
+  //   // })
     
-  //   this.setState({
-  //     page : this.state.page + 1
-  //   })
-  //   this.update();
-  //  }
-  }
-  }
-  // handleIndianClick = () =>{
-  //   this.componentDidMount("in");
-  //   this.handleNext("in");
-  //   this.handlePrevious("in");
+  // //   setState({
+  // //     page : state.page + 1
+  // //   })
+  // //   update();
+  // //  }
+  // }
+  // }
+  //   handleIndianClick = () =>{
+  //   componentDidMount("in");
+  //   handleNext("in");
+  //   handlePrevious("in");
   // } 
 
   // handleAmericanClick = () =>{
-  //   this.componentDidMount("us");
-  //   this.handleNext("us");
-  //   this.handlePrevious("us");
+  //   componentDidMount("us");
+  //   handleNext("us");
+  //   handlePrevious("us");
   // }
 
-  fetchMoreData = async() =>{
-    this.setState({
-      page : this.state.page + 1
-    })
-    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.categoryCountry}&category=${this.props.category}&apiKey=${this.props.apiKey}&page=${this.state.page+1}&pageSize=${this.props.pageSize}`;
+  const fetchMoreData = async() =>{
+    setPage(page + 1)
+    // setState({
+    //   page : state.page + 1
+    // })
+    let url = `https://newsapi.org/v2/top-headlines?country=${props.categoryCountry}&category=${props.category}&apiKey=${props.apiKey}&page=${page+1}&pageSize=${props.pageSize}`;
 
     let data = await fetch(url);
     let parsedData = await data.json();
-
-    this.setState({
-      articles : this.state.articles.concat(parsedData.articles),
-      totalResults : this.state.totalResults,
-  })
-  
-
+    
+    setArticles(articles.concat(parsedData.articles))
+    setTotalResults(totalResults)
+  //   setState({
+  //     articles : state.articles.concat(parsedData.articles),
+  //     totalResults : state.totalResults,
+  // })
   }
-
-  render() {
-    return (
+ return (
       <>
-        <h2 className='text-center'>NewsBite - Top {this.capitalize(this.props.category)} HeadLines</h2>
-        <div className='container'>
-        <CategoryNavbar handleIndianClick={this.handleIndianClick} handleAmericanClick={this.handleAmericanClick}/>
+        
+        <div className='container sticky-top bg-light'>
+        <CategoryNavbar/>
+        <h2 className='text-center my-2' style={{padding:'10px'}}>NewsBite - Top {capitalize(props.category)} HeadLines</h2>
         </div>
        
+        
 
-
-        {this.state.loading && <Spinner/>}
+        {loading && <Spinner/>}
 
         <InfiniteScroll
-          dataLength={this.state.articles.length}
-          next={this.fetchMoreData}
-          hasMore={this.state.articles.length !== this.state.totalResults}
+          dataLength={articles.length}
+          next={fetchMoreData}
+          hasMore={articles.length !== totalResults}
           loader={<Spinner/>}
         >
           <div className='container'>
         <div className='row my-4'>
-          { this.state.articles.map((element) =>{
+          { articles.map((element) =>{
             return <div className='col-md-4 ' key={element.url}><NewsItem title={element.title?element.title.slice(0,60):""} description={element.description?element.description.slice(0,62):""} imageUrl={element.urlToImage} newsUrl={element.url} author={element.author?element.author:"unknown"} publishedAt={element.publishedAt?element.publishedAt:" "} source={element.source.name}/></div>
           })}
    
@@ -413,13 +423,38 @@ export class News extends Component {
           
         </div>  */}
 
-        {/* {!this.state.loading && <div className='container d-flex justify-content-between'>
-           <button disabled={this.state.page<=1} type="button" className="btn btn-dark" onClick={this.handlePrevious}>&larr; Previous</button>
-           <button disabled={this.state.page + 1 > Math.ceil(this.state.totalResults/this.props.pageSize)}type="button" className="btn btn-dark" onClick={this.handleNext}>Next &rarr;</button>
+        {/* {!state.loading && <div className='container d-flex justify-content-between'>
+           <button disabled={state.page<=1} type="button" className="btn btn-dark" onClick={handlePrevious}>&larr; Previous</button>
+           <button disabled={state.page + 1 > Math.ceil(state.totalResults/props.pageSize)}type="button" className="btn btn-dark" onClick={handleNext}>Next &rarr;</button>
         </div>} */}
       </>
     )
   }
+export default News;
+// static defaultProps = {
+//   pageSize : 9,
+//   category : 'general',
+//   apiKey : '686531ff838549f2ae9ed953de34b76f',
+//   categoryCountry : "in"
+// }
+
+// static PropType = {
+//   pageSize : PropTypes.number,
+//   category : PropTypes.string,
+//   apiKey : PropTypes.string,
+//   categoryCountry : PropTypes.string
+// }
+
+News.defaultProps = {
+  pageSize : 9,
+  category : 'general',
+  apiKey : '686531ff838549f2ae9ed953de34b76f',
+  categoryCountry : "in"
 }
 
-export default News
+News.PropType = {
+  pageSize : PropTypes.number,
+  category : PropTypes.string,
+  apiKey : PropTypes.string,
+  categoryCountry : PropTypes.string
+}
